@@ -105,12 +105,12 @@ with st.sidebar:
     api_key = st.text_input("Insert your api key")
 
     llm = ChatOpenAI(
+        openai_api_key=api_key,
         temperature=0.1,
         streaming=True,
         callbacks=[
             ChatCallbackHandler(),
         ],
-        openai_api_key=api_key,
     )
 
     file = st.file_uploader(
