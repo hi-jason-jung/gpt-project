@@ -1,5 +1,5 @@
 env/
 .env
 files/
-.cache/
+# .cache/
 .streamlit

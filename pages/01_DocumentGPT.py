@@ -1,3 +1,4 @@
+import os
 from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
@@ -33,6 +34,11 @@ class ChatCallbackHandler(BaseCallbackHandler):
 def embed_file(file, api_key):
     file_content = file.read()
     file_path = f"./.cache/files/{file.name}"
+
+    # If there are no directory, make the dicrectory.
+    os.makedirs("./.cache/files/", exist_ok=True)
+    os.makedirs(f"./.cache/embeddings/{file.name}", exist_ok=True)
+
     with open(file_path, "wb") as f:
         f.write(file_content)
     cache_dir = LocalFileStore(f"./.cache/embeddings/{file.name}")
