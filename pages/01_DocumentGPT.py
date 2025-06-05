@@ -103,7 +103,7 @@ Upload your files on the sidebar.
 
 with st.sidebar:
     api_key = st.text_input("Insert your api key")
-
+    print(api_key)
     file = st.file_uploader(
         "Upload a .txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
@@ -120,7 +120,7 @@ if api_key:
         ],
     )
 
-if file:
+if file and api_key:
     retriever = embed_file(file, api_key)
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
