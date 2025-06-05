@@ -104,19 +104,20 @@ Upload your files on the sidebar.
 with st.sidebar:
     api_key = st.text_input("Insert your api key")
 
-    llm = ChatOpenAI(
-        openai_api_key=api_key,
-        temperature=0.1,
-        streaming=True,
-        callbacks=[
-            ChatCallbackHandler(),
-        ],
-    )
+    if api_key:
+        llm = ChatOpenAI(
+            openai_api_key=api_key,
+            temperature=0.1,
+            streaming=True,
+            callbacks=[
+                ChatCallbackHandler(),
+            ],
+        )
 
-    file = st.file_uploader(
-        "Upload a .txt .pdf or .docx file",
-        type=["pdf", "txt", "docx"],
-    )
+        file = st.file_uploader(
+            "Upload a .txt .pdf or .docx file",
+            type=["pdf", "txt", "docx"],
+        )
 
 if file:
     retriever = embed_file(file, api_key)
