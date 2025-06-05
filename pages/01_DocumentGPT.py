@@ -43,7 +43,7 @@ def embed_file(file, api_key):
     )
     loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    embeddings = OpenAIEmbeddings(api_key=api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
@@ -110,10 +110,9 @@ with st.sidebar:
         callbacks=[
             ChatCallbackHandler(),
         ],
-        api_key=api_key,
+        openai_api_key=api_key,
     )
 
-    print(api_key)
     file = st.file_uploader(
         "Upload a .txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
