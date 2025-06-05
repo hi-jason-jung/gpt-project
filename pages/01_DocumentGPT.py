@@ -125,6 +125,9 @@ with st.sidebar:
         "Upload a .txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
     )
+    st.markdown(
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/01_DocumentGPT.py)"
+    )
 
 
 if api_key:
