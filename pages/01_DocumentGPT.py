@@ -29,17 +29,8 @@ class ChatCallbackHandler(BaseCallbackHandler):
         self.message_box.markdown(self.message)
 
 
-llm = ChatOpenAI(
-    temperature=0.1,
-    streaming=True,
-    callbacks=[
-        ChatCallbackHandler(),
-    ],
-)
-
-
 @st.cache_data(show_spinner="Embedding file...")
-def embed_file(file):
+def embed_file(file, api_key):
     file_content = file.read()
     file_path = f"./.cache/files/{file.name}"
     with open(file_path, "wb") as f:
@@ -52,7 +43,7 @@ def embed_file(file):
     )
     loader = UnstructuredFileLoader(file_path)
     docs = loader.load_and_split(text_splitter=splitter)
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(api_key=api_key)
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, cached_embeddings)
     retriever = vectorstore.as_retriever()
@@ -111,13 +102,25 @@ Upload your files on the sidebar.
 )
 
 with st.sidebar:
+    api_key = st.text_input("Insert your api key")
+
+    llm = ChatOpenAI(
+        temperature=0.1,
+        streaming=True,
+        callbacks=[
+            ChatCallbackHandler(),
+        ],
+        api_key=api_key,
+    )
+
+    print(api_key)
     file = st.file_uploader(
         "Upload a .txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
     )
 
 if file:
-    retriever = embed_file(file)
+    retriever = embed_file(file, api_key)
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
     message = st.chat_input("Ask anything about your file...")
