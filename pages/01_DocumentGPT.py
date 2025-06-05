@@ -8,7 +8,11 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
 from langchain.chat_models import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler
+from langchain.memory import ConversationBufferMemory
 import streamlit as st
+
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
 
 st.set_page_config(
     page_title="DocumentGPT",
@@ -80,6 +84,11 @@ def format_docs(docs):
     return "\n\n".join(document.page_content for document in docs)
 
 
+def load_memory(_):
+    messages = st.session_state.get("messages", [])
+    return "\n".join([f"{m['role']}: {m['message']}" for m in messages])
+
+
 prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -88,6 +97,8 @@ prompt = ChatPromptTemplate.from_messages(
             Answer the question using ONLY the following context. If you don't know the answer just say you don't know. DON'T make anything up.
             
             Context: {context}
+
+            Chat history:\n{history}
             """,
         ),
         ("human", "{question}"),
@@ -103,12 +114,13 @@ Welcome!
             
 Use this chatbot to ask questions to an AI about your files!
 
-Upload your files on the sidebar.
+1. Insert your OpenAI API key onthe sidebar.
+2. Upload your files on the sidebar.
 """
 )
 
 with st.sidebar:
-    api_key = st.text_input("Insert your api key")
+    api_key = st.text_input("Insert your OpenIA API key")
     file = st.file_uploader(
         "Upload a .txt .pdf or .docx file",
         type=["pdf", "txt", "docx"],
@@ -130,19 +142,17 @@ if file and api_key:
     send_message("I'm ready! Ask away!", "ai", save=False)
     paint_history()
     message = st.chat_input("Ask anything about your file...")
+
     if message:
         send_message(message, "human")
         chain = (
             {
                 "context": retriever | RunnableLambda(format_docs),
                 "question": RunnablePassthrough(),
+                "history": RunnableLambda(load_memory),
             }
             | prompt
             | llm
         )
         with st.chat_message("ai"):
             chain.invoke(message)
-
-
-else:
-    st.session_state["messages"] = []
