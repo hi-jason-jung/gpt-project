@@ -69,7 +69,6 @@ html2text==2020.1.16
 httpcore==0.18.0
 httptools==0.6.0
 httpx==0.25.0
-huggingface-hub==0.16.4
 humanfriendly==10.0
 hyperframe==6.0.1
 idna==3.4
@@ -89,7 +88,10 @@ jsonschema-specifications==2023.7.1
 jupyter_client==8.3.1
 jupyter_core==5.3.1
 kiwisolver==1.4.5
-langchain==0.0.332
+langchain==0.3.2
+langchain-core==0.3.59   
+langchain-huggingface==0.2.0  
+huggingface-hub>=0.20.0  
 langcodes==3.3.0
 langsmith==0.0.52
 layoutparser==0.3.4
@@ -217,7 +219,7 @@ torchvision==0.15.2
 tornado==6.3.3
 tqdm==4.66.1
 traitlets==5.10.0
-transformers==4.34.0
+transformers>=4.40.0
 typer==0.9.0
 typing-inspect==0.9.0
 typing_extensions==4.7.1
