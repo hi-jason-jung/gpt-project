@@ -154,6 +154,9 @@ with st.sidebar:
         ),
         index=1,
     )
+    st.markdown(
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/03_QuizGPT.py)"
+    )
 
 if api_key:
     llm = ChatOpenAI(
