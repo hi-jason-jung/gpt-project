@@ -155,7 +155,7 @@ with st.sidebar:
         index=1,
     )
     st.markdown(
-        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/03_QuizGPT.py)"
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/quizGPT/app.py)"
     )
 
 if api_key:
