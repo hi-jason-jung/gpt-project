@@ -82,7 +82,7 @@ prompt = ChatPromptTemplate.from_messages(
          
     Based ONLY on the following context, please make several quiz (at least 5 quiz) to test the user's knowledge about the text.
     
-    Please adjust the quiz level according to the user's difficulty level(Easy, Normal, Hard) request.
+    Please adjust the quiz level according to the user's difficulty level(Easy, Hard) request.
 
     Each quiz should have 4 answers, three of them must be incorrect and one should be correct.
 
@@ -153,10 +153,8 @@ with st.sidebar:
         "Select the problem difficulty.",
         (
             "Easy",
-            "Normal",
             "Hard",
         ),
-        index=1,
     )
     st.markdown(
         "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/03_QuizGPT.py)"
@@ -202,20 +200,16 @@ else:
                 "Choose the answer.",
                 [answer["answer"] for answer in question["answers"]],
                 index=None,
-                key=f"q{idx}",
             )
 
-            if not st.session_state.retry:
-                if {"answer": value, "correct": True} in question["answers"]:
-                    st.success("Correct!")
-                elif value is not None:
-                    st.error("Wrong!")
-                    is_perfect = False
+            # if not st.session_state.retry:
+            if {"answer": value, "correct": True} in question["answers"]:
+                st.success("Correct!")
+            elif value is not None:
+                st.error("Wrong!")
+                is_perfect = False
         button = st.form_submit_button()
 
     if is_perfect and button:
         st.session_state.retry = False
         st.balloons()
-    if is_perfect is False and st.button("Click here to try again"):
-        st.session_state.retry = True
-        st.rerun()
