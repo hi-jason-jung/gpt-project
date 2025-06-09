@@ -109,6 +109,7 @@ msg-parser==1.2.0
 multidict==6.0.4
 murmurhash==1.0.10
 mypy-extensions==1.0.0
+asyncio==3.4.3
 nest-asyncio==1.5.8
 networkx==3.1
 nltk==3.8.1
