@@ -7,6 +7,8 @@
 # Allow the user to use its own OpenAI API Key, load it from an st.input inside of st.sidebar
 # Using st.sidebar put a link to the Github repo with the code of your Streamlit app.
 
+# Answer: https://github.com/fullstack-gpt-python/assignment-16/blob/main/app.py
+
 import json
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -127,6 +129,7 @@ with st.sidebar:
     docs = None
     topic = None
     api_key = st.text_input("Insert your OpenIA API key")
+    st.markdown("---")
     choice = st.selectbox(
         "Choose what you want to use.",
         (
@@ -145,6 +148,7 @@ with st.sidebar:
         topic = st.text_input("Search Wikipedia...")
         if topic:
             docs = wiki_search(topic)
+    st.markdown("---")
     level = st.selectbox(
         "Select the problem difficulty.",
         (
