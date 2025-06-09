@@ -1,12 +1,3 @@
-# Implement QuizGPT but add the following features:
-
-# Use function calling.
-# Allow the user to customize the difficulty of the test and make the LLM generate hard or easy questions.
-# Allow the user to retake the test if not all answers are correct.
-# If all answers are correct use st.ballons.
-# Allow the user to use its own OpenAI API Key, load it from an st.input inside of st.sidebar
-# Using st.sidebar put a link to the Github repo with the code of your Streamlit app.
-
 import json
 from langchain.document_loaders import UnstructuredFileLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -80,7 +71,7 @@ prompt = ChatPromptTemplate.from_messages(
          
     Based ONLY on the following context, please make several quiz (at least 5 quiz) to test the user's knowledge about the text.
     
-    Please adjust the quiz level according to the user's difficulty level(Easy, Normal, Hard) request.
+    Please adjust the quiz level according to the user's difficulty level(Easy, Hard) request.
 
     Each quiz should have 4 answers, three of them must be incorrect and one should be correct.
 
@@ -127,6 +118,7 @@ with st.sidebar:
     docs = None
     topic = None
     api_key = st.text_input("Insert your OpenIA API key")
+    st.markdown("---")
     choice = st.selectbox(
         "Choose what you want to use.",
         (
@@ -149,10 +141,8 @@ with st.sidebar:
         "Select the problem difficulty.",
         (
             "Easy",
-            "Normal",
             "Hard",
         ),
-        index=1,
     )
     st.markdown(
         "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/quizGPT/app.py)"
@@ -201,17 +191,13 @@ else:
                 key=f"q{idx}",
             )
 
-            if not st.session_state.retry:
-                if {"answer": value, "correct": True} in question["answers"]:
-                    st.success("Correct!")
-                elif value is not None:
-                    st.error("Wrong!")
-                    is_perfect = False
+            if {"answer": value, "correct": True} in question["answers"]:
+                st.success("Correct!")
+            elif value is not None:
+                st.error("Wrong!")
+                is_perfect = False
         button = st.form_submit_button()
 
     if is_perfect and button:
         st.session_state.retry = False
         st.balloons()
-    if is_perfect is False and st.button("Click here to try again"):
-        st.session_state.retry = True
-        st.rerun()
