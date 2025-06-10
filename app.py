@@ -55,26 +55,6 @@ answers_prompt = ChatPromptTemplate.from_template(
 )
 
 
-def get_answers(inputs):
-    docs = inputs["docs"]
-    question = inputs["question"]
-    answers_chain = answers_prompt | llm
-
-    return {
-        "question": question,
-        "answers": [
-            {
-                "answer": answers_chain.invoke(
-                    {"question": question, "context": doc.page_content}
-                ).content,
-                "source": doc.metadata["source"],
-                "date": doc.metadata["lastmod"],
-            }
-            for doc in docs
-        ],
-    }
-
-
 choose_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -92,22 +72,6 @@ choose_prompt = ChatPromptTemplate.from_messages(
         ("human", "{question}"),
     ]
 )
-
-
-def choose_answer(inputs):
-    answers = inputs["answers"]
-    question = inputs["question"]
-    choose_chain = choose_prompt | llm
-    condensed = "\n\n".join(
-        f"{answer['answer']}\nSource:{answer['source']}\nDate:{answer['date']}\n"
-        for answer in answers
-    )
-    return choose_chain.invoke(
-        {
-            "question": question,
-            "answers": condensed,
-        }
-    )
 
 
 def parse_page(soup):
@@ -185,21 +149,57 @@ st.markdown(
 
 with st.sidebar:
     api_key = st.text_input("Insert your OpenIA API key")
-    if api_key:
-        llm = ChatOpenAI(
-            openai_api_key=api_key,
-            temperature=0.1,
-            streaming=True,
-            callbacks=[ChatCallbackHandler()],
-        )
-    # url = st.text_input(
-    #     "Write down a URL",
-    #     placeholder="https://example.com",
-    # )
     url = "https://developers.cloudflare.com/sitemap-0.xml"
     st.markdown(
         "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/siteGPT/app.py)"
     )
+
+
+def get_answers(inputs):
+    docs = inputs["docs"]
+    question = inputs["question"]
+    llm = ChatOpenAI(
+        openai_api_key=api_key,
+        temperature=0.1,
+    )
+    answers_chain = answers_prompt | llm
+
+    return {
+        "question": question,
+        "answers": [
+            {
+                "answer": answers_chain.invoke(
+                    {"question": question, "context": doc.page_content}
+                ).content,
+                "source": doc.metadata["source"],
+                "date": doc.metadata["lastmod"],
+            }
+            for doc in docs
+        ],
+    }
+
+
+def choose_answer(inputs):
+    answers = inputs["answers"]
+    question = inputs["question"]
+    llm = ChatOpenAI(
+        openai_api_key=api_key,
+        temperature=0.1,
+        streaming=True,
+        callbacks=[ChatCallbackHandler()],
+    )
+    choose_chain = choose_prompt | llm
+    condensed = "\n\n".join(
+        f"{answer['answer']}\nSource:{answer['source']}\nDate:{answer['date']}\n"
+        for answer in answers
+    )
+    return choose_chain.invoke(
+        {
+            "question": question,
+            "answers": condensed,
+        }
+    )
+
 
 if api_key and url:
     if ".xml" not in url:
@@ -226,6 +226,7 @@ if api_key and url:
                 | RunnableLambda(choose_answer)
             )
 
-            result = chain.invoke(message)
-            result = result.content.replace("$", "\$")
-            send_message(result, "ai")
+            # result = result.content.replace("$", "\$")
+            # send_message(result, "ai")
+            with st.chat_message("ai"):
+                chain.invoke(message)
