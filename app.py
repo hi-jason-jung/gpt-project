@@ -111,7 +111,7 @@ def parse_page(soup):
 
 
 @st.cache_data(show_spinner="Loading website...")
-def load_website(url):
+def load_website(url, api_key):
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=500,
         chunk_overlap=50,
@@ -127,7 +127,7 @@ def load_website(url):
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
-    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
     return vector_store.as_retriever()
 
 
@@ -191,7 +191,7 @@ if api_key and url:
         with st.sidebar:
             st.error("Please write down a Sitemap URL.")
     else:
-        retriever = load_website(url)
+        retriever = load_website(url, api_key)
         send_message(
             "Hello! I can help you about 1) AI Gateway, 2) Cloudflare Vectorize and 3) Workers AI. Ask away!",
             "ai",
