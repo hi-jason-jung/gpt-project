@@ -18,11 +18,26 @@ from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain.callbacks import StreamingStdOutCallbackHandler
+from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
+
+
+class ChatCallbackHandler(BaseCallbackHandler):
+    message = ""
+
+    def on_llm_start(self, *args, **kwargs):
+        self.message_box = st.empty()
+
+    def on_llm_end(self, *args, **kwargs):
+        save_message(self.message, "ai")
+
+    def on_llm_new_token(self, token, *args, **kwargs):
+        self.message += token
+        self.message_box.markdown(self.message)
+
 
 answers_prompt = ChatPromptTemplate.from_template(
     """
@@ -53,26 +68,6 @@ answers_prompt = ChatPromptTemplate.from_template(
 )
 
 
-def get_answers(inputs):
-    docs = inputs["docs"]
-    question = inputs["question"]
-    answers_chain = answers_prompt | llm
-
-    return {
-        "question": question,
-        "answers": [
-            {
-                "answer": answers_chain.invoke(
-                    {"question": question, "context": doc.page_content}
-                ).content,
-                "source": doc.metadata["source"],
-                "date": doc.metadata["lastmod"],
-            }
-            for doc in docs
-        ],
-    }
-
-
 choose_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -92,22 +87,6 @@ choose_prompt = ChatPromptTemplate.from_messages(
 )
 
 
-def choose_answer(inputs):
-    answers = inputs["answers"]
-    question = inputs["question"]
-    choose_chain = choose_prompt | llm
-    condensed = "\n\n".join(
-        f"{answer['answer']}\nSource:{answer['source']}\nDate:{answer['date']}\n"
-        for answer in answers
-    )
-    return choose_chain.invoke(
-        {
-            "question": question,
-            "answers": condensed,
-        }
-    )
-
-
 def parse_page(soup):
     header = soup.find("header")
     footer = soup.find("footer")
@@ -124,7 +103,7 @@ def parse_page(soup):
 
 
 @st.cache_data(show_spinner="Loading website...")
-def load_website(url):
+def load_website(url, api_key):
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=500,
         chunk_overlap=50,
@@ -140,7 +119,7 @@ def load_website(url):
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
-    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
     return vector_store.as_retriever()
 
 
@@ -183,25 +162,64 @@ st.markdown(
 
 with st.sidebar:
     api_key = st.text_input("Insert your OpenIA API key")
-    if api_key:
-        llm = ChatOpenAI(
-            openai_api_key=api_key,
-            temperature=0.1,
-            streaming=True,
-            callbacks=[StreamingStdOutCallbackHandler()],
-        )
-    # url = st.text_input(
-    #     "Write down a URL",
-    #     placeholder="https://example.com",
-    # )
     url = "https://developers.cloudflare.com/sitemap-0.xml"
+    st.markdown(
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/siteGPT/app.py)"
+    )
+
+
+def get_answers(inputs):
+    docs = inputs["docs"]
+    question = inputs["question"]
+    llm = ChatOpenAI(
+        openai_api_key=api_key,
+        temperature=0.1,
+    )
+    answers_chain = answers_prompt | llm
+
+    return {
+        "question": question,
+        "answers": [
+            {
+                "answer": answers_chain.invoke(
+                    {"question": question, "context": doc.page_content}
+                ).content,
+                "source": doc.metadata["source"],
+                "date": doc.metadata["lastmod"],
+            }
+            for doc in docs
+        ],
+    }
+
+
+def choose_answer(inputs):
+    answers = inputs["answers"]
+    question = inputs["question"]
+    llm = ChatOpenAI(
+        openai_api_key=api_key,
+        temperature=0.1,
+        streaming=True,
+        callbacks=[ChatCallbackHandler()],
+    )
+    choose_chain = choose_prompt | llm
+    condensed = "\n\n".join(
+        f"{answer['answer']}\nSource:{answer['source']}\nDate:{answer['date']}\n"
+        for answer in answers
+    )
+    return choose_chain.invoke(
+        {
+            "question": question,
+            "answers": condensed,
+        }
+    )
+
 
 if api_key and url:
     if ".xml" not in url:
         with st.sidebar:
             st.error("Please write down a Sitemap URL.")
     else:
-        retriever = load_website(url)
+        retriever = load_website(url, api_key)
         send_message(
             "Hello! I can help you about 1) AI Gateway, 2) Cloudflare Vectorize and 3) Workers AI. Ask away!",
             "ai",
@@ -221,6 +239,5 @@ if api_key and url:
                 | RunnableLambda(choose_answer)
             )
 
-            result = chain.invoke(message)
-            result = result.content.replace("$", "\$")
-            send_message(result, "ai")
+            with st.chat_message("ai"):
+                chain.invoke(message)
