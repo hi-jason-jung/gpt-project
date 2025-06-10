@@ -183,7 +183,7 @@ with st.sidebar:
     # )
     url = "https://developers.cloudflare.com/sitemap-0.xml"
     st.markdown(
-        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/01_DocumentGPT.py)"
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/siteGPT/app.py)"
     )
 
 if api_key and url:
