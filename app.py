@@ -1,16 +1,3 @@
-# - Build a SiteGPT version for Cloudflare's documentation.
-# - The chat bot should be able to answers questions about the documentation of each one of these products:
-#   - AI Gateway
-#   - Cloudflare Vectorize
-#   - Workers AI
-# - Use the sitemap(https://developers.cloudflare.com/sitemap-0.xml) to find all the documentation pages for each product.
-# - Your submission will be tested with the following questions:
-#   - "What is the price per 1M input tokens of the llama-2-7b-chat-fp16 model?"
-#   - "What can I do with Cloudflare’s AI Gateway?"
-#   - "How many indexes can a single account have in Vectorize?"
-# - Allow the user to use its own OpenAI API Key, load it from an st.input inside of st.sidebar
-# - Using st.sidebar put a link to the Github repo with the code of your Streamlit app.
-
 from langchain.document_loaders import SitemapLoader
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
