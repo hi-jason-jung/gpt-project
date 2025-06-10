@@ -5,11 +5,26 @@ from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain.callbacks import StreamingStdOutCallbackHandler
+from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
+
+
+class ChatCallbackHandler(BaseCallbackHandler):
+    message = ""
+
+    def on_llm_start(self, *args, **kwargs):
+        self.message_box = st.empty()
+
+    def on_llm_end(self, *args, **kwargs):
+        save_message(self.message, "ai")
+
+    def on_llm_new_token(self, token, *args, **kwargs):
+        self.message += token
+        self.message_box.markdown(self.message)
+
 
 answers_prompt = ChatPromptTemplate.from_template(
     """
@@ -175,7 +190,7 @@ with st.sidebar:
             openai_api_key=api_key,
             temperature=0.1,
             streaming=True,
-            callbacks=[StreamingStdOutCallbackHandler()],
+            callbacks=[ChatCallbackHandler()],
         )
     # url = st.text_input(
     #     "Write down a URL",
