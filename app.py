@@ -182,6 +182,9 @@ with st.sidebar:
     #     placeholder="https://example.com",
     # )
     url = "https://developers.cloudflare.com/sitemap-0.xml"
+    st.markdown(
+        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/01_DocumentGPT.py)"
+    )
 
 if api_key and url:
     if ".xml" not in url:
