@@ -11,15 +11,19 @@
 # - Allow the user to use its own OpenAI API Key, load it from an st.input inside of st.sidebar
 # - Using st.sidebar put a link to the Github repo with the code of your Streamlit app.
 
+# Answer: https://github.com/fullstack-gpt-python/assignment-17/blob/main/app.py
+
 from langchain.document_loaders import SitemapLoader
 from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings, CacheBackedEmbeddings
+from langchain.storage import LocalFileStore
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.callbacks.base import BaseCallbackHandler
 import streamlit as st
+import hashlib
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
@@ -119,7 +123,17 @@ def load_website(url, api_key):
     )
     loader.requests_per_second = 2
     docs = loader.load_and_split(text_splitter=splitter)
-    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
+
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+
+    safe_cache_filename = hashlib.md5(url.encode()).hexdigest()
+    cache_dir = LocalFileStore(f"./.cache/{safe_cache_filename}/")
+    cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
+        embeddings,
+        cache_dir,
+    )
+    vector_store = FAISS.from_documents(docs, cached_embeddings)
+
     return vector_store.as_retriever()
 
 
@@ -162,9 +176,15 @@ st.markdown(
 
 with st.sidebar:
     api_key = st.text_input("Insert your OpenIA API key")
-    url = "https://developers.cloudflare.com/sitemap-0.xml"
+    url = st.text_input(
+        "Write down a URL",
+        placeholder="https://example.com",
+        value="https://developers.cloudflare.com/sitemap-0.xml",
+        disabled=True,
+    )
+    st.markdown("---")
     st.markdown(
-        "[Github Repository](https://github.com/hi-jason-jung/gpt-project/blob/siteGPT/app.py)"
+        "[Github Repository - SiteGPT](https://github.com/hi-jason-jung/gpt-project/blob/siteGPT/app.py)"
     )
 
 
@@ -214,10 +234,12 @@ def choose_answer(inputs):
     )
 
 
-if api_key and url:
+if url:
     if ".xml" not in url:
         with st.sidebar:
             st.error("Please write down a Sitemap URL.")
+    if not api_key:
+        st.error("Please input your OpenAI API Key on the sidebar")
     else:
         retriever = load_website(url, api_key)
         send_message(
