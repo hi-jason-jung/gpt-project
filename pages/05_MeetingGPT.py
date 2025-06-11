@@ -13,9 +13,37 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import StrOutputParser
 from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings import CacheBackedEmbeddings, OpenAIEmbeddings
+from langchain.schema.runnable import RunnableLambda, RunnablePassthrough
+from langchain.callbacks.base import BaseCallbackHandler
+
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
+
+
+def save_message(message, role):
+    st.session_state["messages"].append({"message": message, "role": role})
+
+
+class ChatCallbackHandler(BaseCallbackHandler):
+    message = ""
+
+    def on_llm_start(self, *args, **kwargs):
+        self.message_box = st.empty()
+
+    def on_llm_end(self, *args, **kwargs):
+        save_message(self.message, "ai")
+
+    def on_llm_new_token(self, token, *args, **kwargs):
+        self.message += token
+        self.message_box.markdown(self.message)
+
 
 llm = ChatOpenAI(
     temperature=0.1,
+    streaming=True,
+    callbacks=[
+        ChatCallbackHandler(),
+    ],
 )
 
 has_transcript = os.path.exists("./.cache/podcast.txt")
@@ -91,6 +119,15 @@ def cut_audio_in_chunks(audio_path, chunk_size, chunks_folder):
             f"./{chunks_folder}/chunk_{i}.mp3",
             format="mp3",
         )
+
+
+def format_docs(docs):
+    return "\n\n".join(document.page_content for document in docs)
+
+
+def load_memory(_):
+    messages = st.session_state.get("messages", [])
+    return "\n".join([f"{m['role']}: {m['message']}" for m in messages])
 
 
 st.set_page_config(
@@ -193,6 +230,32 @@ if video:
     with qa_tab:
         retriever = embed_file(transcript_path)
 
-        docs = retriever.invoke("do they talk about marcus aurelius?")
+        qa_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """
+            Answer the question using ONLY the following context. If you don't know the answer just say you don't know. DON'T make anything up.
+            
+            Context: {context}
 
-        st.write(docs)
+            Chat history:\n{history}
+            """,
+                ),
+                ("human", "{question}"),
+            ]
+        )
+
+        docs = retriever.invoke("do they talk about marcus aurelius?")
+        message = st.text_input("Ask a question for this video")
+        chain = (
+            {
+                "context": retriever | RunnableLambda(format_docs),
+                "question": RunnablePassthrough(),
+                "history": RunnableLambda(load_memory),
+            }
+            | qa_prompt
+            | llm
+        )
+
+        chain.invoke(message)
