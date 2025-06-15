@@ -95,10 +95,12 @@ jsonschema-specifications==2023.7.1
 jupyter_client==8.3.1
 jupyter_core==5.3.1
 kiwisolver==1.4.5
-langchain==0.0.332
+langchain==0.1.14
+langchain-core==0.3.65
+langchain-community==0.0.33
 langchain-text-splitters==0.3.8
 langcodes==3.3.0
-langsmith==0.0.52
+langsmith==0.1.127
 layoutparser==0.3.4
 loguru==0.7.2
 lxml==5.4.0
