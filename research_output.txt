@@ -1,2 +1,22 @@
-In February 2024, a malicious backdoor was introduced to the Linux build of the xz utility within the liblzma library in versions 5.6.0 and 5.6.1 by an account using the name "Jia Tan". The backdoor gives an attacker who possesses a specific Ed448 private key remote code execution through OpenSSH on the affected Linux system. The issue has been given the Common Vulnerabilities and Exposures number CVE-2024-3094 and has been assigned a CVSS score of 10.0, the highest possible score.
-While xz is commonly present in most Linux distributions, at the time of discovery the backdoored version had not yet been widely deployed to production systems, but was present in development versions of major distributions. The backdoor was discovered by the software developer Andres Freund, who announced his findings on 29 March 2024.
+# 2025년 삼성전자 주가 전망
+
+## 1. 현재 주가 현황
+2025년 4월 22일 기준으로 삼성전자의 주가는 55,200원이었으며, 52주 최고가는 88,800원, 최저가는 49,900원이었습니다. 최근 몇 달 간 주가는 큰 변동성을 겪었고, 외국인의 순매도 규모가 66만 주를 초과했습니다. 
+
+## 2. 주가 전망의 주요 요인
+2025년 삼성전자 주가 전망에서 가장 중요한 키워드는 **'반도체 회복'**입니다. 글로벌 수요가 증가하고 고성능 반도체(HBM, DDR5 등)에 대한 수요가 커지면서 삼성전자의 메모리 부문 실적이 반등할 가능성이 큽니다. 특히 AI 산업의 성장과 데이터센터 투자 확대는 삼성전자의 주요 성장 동력으로 작용할 수 있습니다.
+
+## 3. 반도체 시장 회복
+삼성전자는 인텔을 제치고 글로벌 반도체 매출 1위 자리를 탈환했습니다. 이는 반도체 시장의 회복세와 더불어, 경쟁사인 SK하이닉스와의 격차를 벌릴 수 있는 중요한 요인으로 평가됩니다. 삼성전자는 메모리 반도체뿐만 아니라 파운드리 사업에서도 꾸준한 성장을 이루고 있습니다.
+
+## 4. 투자 포인트
+- **반도체 업황 반등 여부**: 반도체 시장의 회복이 삼성전자 주가에 미치는 영향이 크므로, 이 부분이 중요한 체크포인트입니다.
+- **AI 및 차량용 반도체 시장 진출**: AI와 차량용 반도체 시장의 성장 가능성도 주가에 긍정적인 영향을 미칠 수 있습니다.
+- **배당 확대 및 주주 친화 정책**: 주주 친화적인 정책이 주가에 긍정적인 영향을 줄 수 있습니다.
+
+## 5. 결론
+2025년 삼성전자의 주가는 반도체 업황 회복 여부와 AI 시장 확장에 달려 있으며, 장기적인 투자 관점에서 접근하는 것이 유리할 것으로 보입니다. 
+
+## 참고 자료
+- [DuckDuckGo 검색 결과](https://www.duckduckgo.com) 
+- [Wikipedia - Samsung Electronics](https://en.wikipedia.org/wiki/Samsung_Electronics)
