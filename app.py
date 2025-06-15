@@ -26,7 +26,7 @@ Ask me a question, and I will research it using Wikipedia, DuckDuckGo, and Web S
 with st.sidebar:
     api_key = st.text_input("Insert your OpenAI API Key", type="password")
     st.markdown(
-        "[GitHub Repository - WebSearchGPT_Assistant](https://github.com/hi-jason-jung/gpt-project/blob/master/pages/08_WebSearchGPT_Assistant.py)"
+        "[GitHub Repository - WebSearchGPT_Assistant](https://github.com/hi-jason-jung/gpt-project/blob/finalProject/app.py)"
     )
 
 if not api_key:
